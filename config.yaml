@@ -1,0 +1,18 @@
+data:
+  raw:
+    file1: "../data/raw/2025_QoS_Metropole_data_habitations.csv"
+    file2: "../data/raw/2025_T1_sites_Metropole.csv"
+    file3: "../data/raw/v_commune_2026.csv"
+    file4: "../data/raw/v_departement_2026.csv"
+    file5: "../data/raw/v_region_2026.csv"
+    file6: "../data/raw/insee_com_population.csv"
+    file7: "../data/raw/geo_insee.csv"
+    
+
+  clean:
+    file1: "../data/clean/geo_population_table.csv"
+    file2: "../data/clean/insee_sites_clean.csv"
+    file3: "../data/clean/5G_qos_clean.csv"
+    file4: "../data/clean/insee_com_population.csv"
+    file5: "../data/clean/insee_geo.csv"
+
