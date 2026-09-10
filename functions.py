@@ -184,7 +184,7 @@ def clean_qos_df(raw_qos_df):
     clean_qos_df['situation'] = clean_qos_df['situation'].str.capitalize()
 
     #Add protocol_id and operator_id columns
-    clean_qos_df['operator_id'] = [4 if item == "Bouygues" else 2 if item == "SFR" else 1 if item == "Orange" else 4 for item in clean_qos_df['operator']]
+    clean_qos_df['operator_id'] = [4 if item == "Bouygues" else 2 if item == "SFR" else 1 if item == "Orange" else 3 for item in clean_qos_df['operator']]
     clean_qos_df['protocol_id'] = [1 if item == "WEB" else 2 if item == "STREAM" else 3 if item == "DOWNLOAD" else 4 for item in clean_qos_df['protocole']]
 
     #create id_measure
@@ -235,6 +235,9 @@ def clean_sites_file(site_file):
                         "site_id",
                         range(1, len(sites_clean_df)+1)
                         )
+
+    #Add protocol_id and operator_id columns
+    sites_clean_df['operator_id'] = [4 if item == "Bouygues Telecom" else 2 if item == "SFR" else 1 if item == "Orange" else 3 for item in sites_clean_df['nom_op']]
     
     #Export to data/clean folder
     file_name = "insee_sites_clean.csv"
