@@ -158,8 +158,8 @@ def clean_qos_df(raw_qos_df):
         "territory"
                       ]
     
-    print("Number of completeley empty colunms is:", len(empty_columns))
-    print("Number of irrelevant columns is:", len(other_columns_to_drop))
+    #print("Number of completeley empty colunms is:", len(empty_columns))
+    #print("Number of irrelevant columns is:", len(other_columns_to_drop))
     #drop completely empty columns
     #print("Empty columns: ", empty_columns)
     clean_qos_df = clean_qos_df.drop(columns = empty_columns)
@@ -168,8 +168,8 @@ def clean_qos_df(raw_qos_df):
     #Drop protocol lines: 
     protocol_rows_to_drop = ["ICMP", "ULH", "DLH"]
     clean_qos_df = clean_qos_df[~clean_qos_df['protocole'].isin(protocol_rows_to_drop)].reset_index(drop=True)
-    print("\nnumber of columns before cleaning: ", len(raw_qos_df.columns))
-    print("\nnumber of columns after cleaning: ", len(clean_qos_df.columns))
+    #print("\nnumber of columns before cleaning: ", len(raw_qos_df.columns))
+    #print("\nnumber of columns after cleaning: ", len(clean_qos_df.columns))
     
     #Convert bitrate_ul, bitrate_dl, acess duration to float
     clean_qos_df['bitrate_dl'] = clean_qos_df['bitrate_dl'].astype("string").str.replace(",", ".").astype(float)
@@ -184,10 +184,11 @@ def clean_qos_df(raw_qos_df):
     clean_qos_df['situation'] = clean_qos_df['situation'].str.capitalize()
 
     #Add protocol_id and operator_id columns
-    clean_qos_df['operator_id'] = [1 if item == "Bouygues" else 2 if item == "Free" else 3 if item == "Orange" else 4 for item in clean_qos_df['operator']]
+    clean_qos_df['operator_id'] = [4 if item == "Bouygues" else 2 if item == "SFR" else 1 if item == "Orange" else 4 for item in clean_qos_df['operator']]
     clean_qos_df['protocol_id'] = [1 if item == "WEB" else 2 if item == "STREAM" else 3 if item == "DOWNLOAD" else 4 for item in clean_qos_df['protocole']]
 
     #create id_measure
+
     clean_qos_df.insert(0,
                         "measure_id",
                         range(1, len(clean_qos_df)+1)
