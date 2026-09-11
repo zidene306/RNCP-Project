@@ -6,6 +6,12 @@ import os
 import sys
 from pathlib import Path
 import yaml
+import sqlalchemy
+import pymysql
+from dotenv import load_dotenv
+from sqlalchemy import create_engine,text
+import time
+
 
 project_root = Path.cwd().parent
 sys.path.append(str(project_root))
@@ -246,3 +252,64 @@ def clean_sites_file(site_file):
     print(f"File '{file_name}' is successfully saved to 'data/clean' folder.")
     
     return sites_clean_df
+
+#-----------------------------------------------------------------------------
+# ESTABLISH SQL CONNECTION AND UPLOAD A TABLE
+#-----------------------------------------------------------------------------
+
+def load_to_sql(file_to_load, sql_table_name):
+
+    start_time = time.time()
+    load_dotenv()
+
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    host = os.getenv("DB_HOST")
+    port = os.getenv("DB_PORT")
+    db = os.getenv("DB_NAME")
+
+    connection_string = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}"
+    engine = create_engine(connection_string)
+
+    # Test connection
+    try:
+        with engine.connect() as connection:
+            result = connection.execute(text("SELECT DATABASE();"))
+            print(f"Connected to SQL DB: {result.scalar()}")
+    except Exception as err:
+        print(f"Failed to connect to MySQL: {err}")
+        return
+
+    # Upload DataFrame in optimized batches
+    try:
+        print(f"Uploading {len(file_to_load)} rows to '{sql_table_name}'...")
+
+        with engine.begin() as conn:
+            # Temporarily disable foreign key checks, truncate table, re-enable checks
+            conn.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
+            conn.execute(text(f"TRUNCATE TABLE `{sql_table_name}`;"))
+            conn.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
+
+        # Append fresh data to the clean tabl
+        file_to_load.to_sql(
+            name=sql_table_name,
+            con=engine,
+            if_exists="append",
+            index=False,
+            chunksize=5000,  # Sends 5000 rows per query batch
+            method="multi",  # Combines INSERT statements for speed
+        )
+    except Exception as err:
+        print(
+            f"The file was not loaded to SQL server.\nExact Error: {type(err).__name__} - {err}"
+        )
+    else:
+        print(
+            f"The file was successfully loaded to '{sql_table_name}' in MySQL."
+        )
+    finally:
+        engine.dispose()  # Closes connection pool cleanly
+
+    end_time = time.time()
+    print(f"Opening SQL connection + loading file' {sql_table_name}' took: {end_time - start_time: .2f}sec")
+    
