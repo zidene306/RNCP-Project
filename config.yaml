@@ -10,9 +10,10 @@ data:
     
 
   clean:
-    file1: "../data/clean/geo_population_table.csv"
-    file2: "../data/clean/insee_sites_clean.csv"
-    file3: "../data/clean/5G_qos_clean.csv"
-    file4: "../data/clean/insee_com_population.csv"
-    file5: "../data/clean/insee_geo.csv"
+    file1: "data/clean/geo_population_table.csv"
+    file2: "data/clean/insee_sites_clean.csv"
+    file3: "data/clean/5G_qos_clean.csv"
+    file4: "data/clean/insee_com_population.csv"
+    file5: "data/clean/insee_geo.csv"
+    file6: "data/clean/denormalized_qos.csv"
 

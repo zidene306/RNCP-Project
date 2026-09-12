@@ -113,3 +113,9 @@ DESCRIBE dim_operator;
 DESCRIBE dim_protocol;
 DESCRIBE sites;
 DESCRIBE fact_qos_measurements;
+
+ALTER TABLE sites
+DROP COLUMN site_5g_700_m_hz,
+DROP COLUMN site_5g_800_m_hz,
+DROP COLUMN site_5g_1800_m_hz,
+DROP COLUMN site_5g_2100_m_hz ;

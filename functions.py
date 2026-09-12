@@ -11,6 +11,10 @@ import pymysql
 from dotenv import load_dotenv
 from sqlalchemy import create_engine,text
 import time
+import warnings
+import seaborn as sns
+import matplotlib as plt
+
 
 
 project_root = Path.cwd().parent
@@ -29,7 +33,7 @@ clean_folder = r"C:\Users\ziden\Desktop\Trainings\RNCP-Project\data\clean"
 def open_raw_file(filex):
     
     try:
-        with open("../config.yaml", "r") as file:
+        with open("config.yaml", "r") as file:
             config = yaml.safe_load(file)
     except:
         print("Yaml configuration file not found!")
@@ -46,7 +50,7 @@ def open_raw_file(filex):
 def open_clean_file(filex):
     
     try:
-        with open("../config.yaml", "r") as file:
+        with open("./config.yaml", "r") as file:
             config = yaml.safe_load(file)
     except:
         print("Yaml configuration file not found!")
@@ -183,7 +187,7 @@ def clean_qos_df(raw_qos_df):
     clean_qos_df['acess_duration'] = clean_qos_df['acess_duration'].astype("string").str.replace(",", ".").astype(float)
 
     #Convert start_date, start_time to date & time respectively
-    clean_qos_df['date_start'] = pd.to_datetime(clean_qos_df['date_start'], format="%d-%m-%Y", errors="coerce")
+    clean_qos_df['date_start'] = pd.to_datetime(clean_qos_df['date_start'], dayfirst=True)#, format="%d/%m/%Y")#, errors="coerce")
     clean_qos_df['hour_start'] = pd.to_datetime(clean_qos_df['hour_start'], format="%H:%M:%S", errors="coerce").dt.time
 
     #Clean 'situation' column: former: ['Incar', 'Indoor', 'Outdoor', 'indoor', 'outdoor', 'incar']
@@ -300,6 +304,7 @@ def load_to_sql(file_to_load, sql_table_name):
             method="multi",  # Combines INSERT statements for speed
         )
     except Exception as err:
+        
         print(
             f"The file was not loaded to SQL server.\nExact Error: {type(err).__name__} - {err}"
         )
@@ -312,4 +317,3 @@ def load_to_sql(file_to_load, sql_table_name):
 
     end_time = time.time()
     print(f"Opening SQL connection + loading file' {sql_table_name}' took: {end_time - start_time: .2f}sec")
-    
