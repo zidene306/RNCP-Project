@@ -10,5 +10,3 @@ FROM qos_denormalized
 GROUP BY operator_name, situation
 ORDER BY operator_name DESC, situation ASC;
 
-
-    

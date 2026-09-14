@@ -1,12 +1,12 @@
 data:
   raw:
-    file1: "../data/raw/2025_QoS_Metropole_data_habitations.csv"
-    file2: "../data/raw/2025_T1_sites_Metropole.csv"
-    file3: "../data/raw/v_commune_2026.csv"
-    file4: "../data/raw/v_departement_2026.csv"
-    file5: "../data/raw/v_region_2026.csv"
-    file6: "../data/raw/insee_com_population.csv"
-    file7: "../data/raw/geo_insee.csv"
+    file1: "data/raw/2025_QoS_Metropole_data_habitations.csv"
+    file2: "data/raw/2025_T1_sites_Metropole.csv"
+    file3: "data/raw/v_commune_2026.csv"
+    file4: "data/raw/v_departement_2026.csv"
+    file5: "data/raw/v_region_2026.csv"
+    file6: "data/raw/insee_com_population.csv"
+    file7: "data/raw/geo_insee.csv"
     
 
   clean:
@@ -16,4 +16,4 @@ data:
     file4: "data/clean/insee_com_population.csv"
     file5: "data/clean/insee_geo.csv"
     file6: "data/clean/denormalized_qos.csv"
-
+    file7: "data/clean/test_communes.csv"

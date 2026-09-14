@@ -1,19 +1,5 @@
 USE mobile_5g_network_fr;
-CREATE TABLE sites_by_operator_commune AS
-SELECT
-    operator_id,
-    insee_com,
-    COUNT(*) AS nbr_sites,
-    SUM(site_4g) AS nbr_sites_4g,
-    SUM(site_5g) AS nbr_sites_5g,
-    SUM(fake_5g) AS nbr_sites_fake_5g
-FROM sites
-GROUP BY
-    operator_id,
-    insee_com;
-    
-    SELECT * FROM sites_by_operator_commune;
-
+SELECT * FROM sites_by_operator_commune;
 
 -- DENORMALIZE QOS_measurements
 
@@ -54,10 +40,11 @@ SELECT
     p.protocol_code,
     
     -- from sites_by_operator_commune
-    s.nbr_sites,
-    s.nbr_sites_4g,
-    s.nbr_sites_5g,
-    s.nbr_sites_fake_5g
+    s.tot_phys_sites,
+    s.tot_4g_per_op_com,
+    s.tot_5g_per_op_com,
+    s.tot_fake_5g_per_op_com,
+    s.tot_5g_sites
     
 FROM fact_qos_measurements as q
 LEFT JOIN dim_geo as g
@@ -72,5 +59,8 @@ ON q.protocol_id = p.protocol_id
 LEFT JOIN sites_by_operator_commune as s
 ON q.insee_com = s.insee_com AND q.operator_id = s.operator_id;
 
-SELECT COUNT(*) FROM qos_denormalized;
+SELECT * FROM qos_denormalized;
+DESCRIBE qos_denormalized;
+
+SELECT * FROM sites_by_operator_commune;
 

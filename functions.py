@@ -15,10 +15,20 @@ import warnings
 import seaborn as sns
 import matplotlib as plt
 
+PROJECT_ROOT = Path(__file__).resolve().parent
 
 
-project_root = Path.cwd().parent
-sys.path.append(str(project_root))
+with open(PROJECT_ROOT / "config.yaml", encoding="utf-8") as f:
+    config = yaml.safe_load(f)
+
+#try:
+    #with open("../config.yaml", "r") as file:
+        #config = yaml.safe_load(file)
+#except:
+    ##print("Yaml configuration file not found!")
+
+#project_root = Path.cwd().parent
+#sys.path.append(str(project_root))
 import functions as fn
 
 #Data raw folder path:
@@ -31,15 +41,10 @@ clean_folder = r"C:\Users\ziden\Desktop\Trainings\RNCP-Project\data\clean"
 #-----------------------------------------------------------------------------
 
 def open_raw_file(filex):
-    
-    try:
-        with open("config.yaml", "r") as file:
-            config = yaml.safe_load(file)
-    except:
-        print("Yaml configuration file not found!")
+       
     
     #read QoS file
-    my_raw_file = pd.read_csv(config["data"]["raw"][filex], sep=";", dtype={"insee_com": "str"}, encoding="latin1")
+    my_raw_file = pd.read_csv(PROJECT_ROOT / config["data"]["raw"][filex], sep=";", dtype={"insee_com": "str"}, encoding="latin1")
     
     return my_raw_file
 
@@ -49,14 +54,9 @@ def open_raw_file(filex):
 
 def open_clean_file(filex):
     
-    try:
-        with open("./config.yaml", "r") as file:
-            config = yaml.safe_load(file)
-    except:
-        print("Yaml configuration file not found!")
-    
+    path = PROJECT_ROOT/config["data"]["clean"][filex]
     #read QoS file
-    my_clean_file = pd.read_csv(config["data"]["clean"][filex], sep=",", dtype={"insee_com": "str"}, encoding="latin1")
+    my_clean_file = pd.read_csv(path, sep=",", dtype={"insee_com": "str"}, encoding="latin1")
     
     return my_clean_file
 
@@ -68,16 +68,17 @@ def insee_geo_flat_extract():
     """
     It merges 3 files to extract the collectivity insee_cod and name
     output: df with commune, department, region
-    """
+    
 
     try:
         with open("../config.yaml", "r") as cog_file:
             config = yaml.safe_load(cog_file)
     except:
         print("Yaml configuration file not found!")
+    """
 
     #read the 3 csv files
-    cog_com_df = pd.read_csv(config["data"]["raw"]["file3"], dtype={"COM":"str", "REG": "str", "DEP": "str"})
+    cog_com_df = pd.read_csv(config["data"]["raw"]["file3"], dtype={"COM":"str", "REG": "str", "DEP": "str"}, encoding="utf-8")
     cog_com_df = cog_com_df[cog_com_df['TYPECOM'] == 'COM']
     cog_com_df = cog_com_df[['COM', 'REG', 'DEP', 'NCC']]
 
@@ -85,12 +86,12 @@ def insee_geo_flat_extract():
     cog_dept_df = cog_dept_df[['DEP','NCC']]
     
     cog_reg_df = pd.read_csv(config["data"]["raw"]["file5"], dtype={"REG": "str"})
-    cog_reg_df = cog_reg_df[['REG', 'NCC']]
+    cog_reg_df = cog_reg_df[['REG', 'NCC', 'LIBELLE']]
     
     #rename columns
     cog_com_df = cog_com_df.rename(columns = {'COM': 'insee_com', 'REG': 'insee_reg', 'DEP':'insee_dep', 'NCC':'com_name'})
     cog_dept_df = cog_dept_df.rename(columns = {'DEP': 'insee_dep','NCC':'dep_name'})
-    cog_reg_df = cog_reg_df.rename(columns = {'REG': 'insee_reg', 'NCC':'reg_name'})
+    cog_reg_df = cog_reg_df.rename(columns = {'REG': 'insee_reg', 'LIBELLE':'reg_name'})
 
     #merge df
     merged_com_dep = cog_com_df.merge(cog_dept_df, on='insee_dep', how='left').merge(
@@ -115,7 +116,7 @@ def pop_geo_merge_df(population_df, geo_df):
     """ input: geo(com+dep+reg) df and population df 
         This function merges the 2 df
         Output: merged df with population in com/dep/regions
-    """
+    
 
     try:
         with open("../config.yaml", "r") as file:
@@ -123,11 +124,12 @@ def pop_geo_merge_df(population_df, geo_df):
            
     except:
         print("Yaml configuration file not found!")
-    
+    """
+
     #open Geographic file
-    geo_df = pd.read_csv(config["data"]["raw"]["file7"], dtype={"insee_com":"str", "insee_dep":"str", "insee_reg":"str"})
+    #geo_df = pd.read_csv(config["data"]["raw"]["file7"], dtype={"insee_com":"str", "insee_dep":"str", "insee_reg":"str"})
     #open population file
-    population_df = pd.read_csv(config["data"]["raw"]["file6"], dtype={"year":"int", "population": "int", "insee_com":"str"})
+    #population_df = pd.read_csv(config["data"]["raw"]["file6"], dtype={"year":"int", "population": "int", "insee_com":"str"})
 
     #reorder columns of population df
     population_df = population_df[["insee_com", "year", "measure", "population"]]
@@ -151,13 +153,15 @@ def pop_geo_merge_df(population_df, geo_df):
 
 def clean_qos_df(raw_qos_df):
     
-    raw_qos_df = fn.open_raw_file("file1")
-    clean_qos_df = raw_qos_df.copy()
+    raw_qos_df = open_raw_file("file1")
 
+    clean_qos_df = raw_qos_df.copy()
+    test_communes = open_clean_file("file7").iloc[:, 0]
     #Exlude 4 communes that have no population data in INSEE population
     clean_qos_df['insee_com'] = clean_qos_df.insee_com.apply(lambda x: x.strip()).astype("string").str.zfill(5)
-    excluded_communes = ["12076", "92201", "44701", "69159"] # communes having no population data
-    clean_qos_df = clean_qos_df[~clean_qos_df['insee_com'].isin(excluded_communes)]
+    #excluded_communes = ["12076", "92201", "44701", "69159"] # communes having no population data
+    
+    clean_qos_df = clean_qos_df[clean_qos_df['insee_com'].isin(test_communes)]
 
     empty_columns = clean_qos_df.columns[clean_qos_df.isna().all()]
     other_columns_to_drop = [ "mcc_start",
@@ -249,6 +253,10 @@ def clean_sites_file(site_file):
     #Add protocol_id and operator_id columns
     sites_clean_df['operator_id'] = [4 if item == "Bouygues Telecom" else 2 if item == "SFR" else 1 if item == "Orange" else 3 for item in sites_clean_df['nom_op']]
     
+    #Drop the communes that are not included in measurements
+    test_communes = open_clean_file("file7").iloc[:, 0]
+    sites_clean_df = sites_clean_df[sites_clean_df['insee_com'].isin(test_communes)]
+
     #Export to data/clean folder
     file_name = "insee_sites_clean.csv"
     file_path = os.path.join(clean_folder, file_name)
